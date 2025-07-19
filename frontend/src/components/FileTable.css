@@ -1,10 +1,78 @@
 .file-table-container {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   width: 100%;
   margin: 0;
+  border: 1px solid #e9ecef;
+}
+
+/* Filter Buttons */
+.filter-buttons-container {
+  display: flex;
+  gap: 0;
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e9ecef;
+  background: white;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 25px 25px 0 0;
+  margin-right: 4px;
+  position: relative;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.filter-btn:hover {
+  background: #f8f9fa;
+  color: #495057;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.filter-btn.active:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.filter-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: inherit;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+.filter-btn.active .filter-count {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.filter-btn:not(.active) .filter-count {
+  background: #e9ecef;
+  color: #6c757d;
 }
 
 .table-header {
@@ -14,6 +82,74 @@
   padding: 1.5rem;
   background: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
+  position: relative;
+}
+
+/* Pagination Styles */
+.pagination-container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e9ecef;
+  background: white;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+  margin: 0 1px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  color: #495057;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.pagination-btn:disabled {
+  background: #f8f9fa;
+  color: #adb5bd;
+  cursor: not-allowed;
+  border-color: #e9ecef;
+}
+
+.pagination-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: #6c757d;
+  font-weight: bold;
+  font-size: 1rem;
 }
 
 .table-controls {
@@ -117,19 +253,59 @@
 .file-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
-  table-layout: auto;
-  min-width: 1200px;
+  font-size: 0.9rem;
+  background: white;
 }
 
-.file-table th,
-.file-table td {
-  padding: 0.75rem 0.5rem;
+.file-table th {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #2c3e50;
+  font-weight: 700;
+  padding: 0.8rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #e9ecef;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-bottom: 3px solid #667eea;
+  border-right: 1px solid #dee2e6;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-table th:last-child {
+  border-right: none;
+}
+
+.file-table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #f1f3f4;
+  border-right: 1px solid #f8f9fa;
+  vertical-align: middle;
+  transition: background-color 0.2s ease;
+}
+
+.file-table td:last-child {
+  border-right: none;
+}
+
+.file-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.file-table tbody tr:hover {
+  background: linear-gradient(135deg, #f8f9ff 0%, #fff5f5 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.file-table tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+.file-table tbody tr:nth-child(even):hover {
+  background: linear-gradient(135deg, #f8f9ff 0%, #fff5f5 100%);
 }
 
 .file-table th:nth-child(1), .file-table td:nth-child(1) { width: 8%; }  /* File ID */
@@ -169,12 +345,15 @@
 
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 0.4rem 1rem;
+  border-radius: 25px;
+  font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .status-created {
@@ -209,6 +388,38 @@
 .action-buttons {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.action-btn:hover::before {
+  left: 100%;
 }
 
 .btn {
@@ -310,10 +521,40 @@
     align-items: stretch;
   }
   
+  .filter-buttons-container {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .filter-btn {
+    min-width: auto;
+    width: 100%;
+    border-radius: 8px;
+    margin-right: 0;
+  }
+  
+  .table-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+    position: static;
+  }
+  
+  .pagination-container {
+    position: static;
+    transform: none;
+    left: auto;
+    top: auto;
+    justify-content: center;
+    order: 2;
+  }
+  
   .table-controls {
     flex-direction: column;
     gap: 0.75rem;
     align-items: stretch;
+    order: 3;
   }
   
   .search-input {
