@@ -34,10 +34,10 @@ function App() {
     }
   }
 
-  // Auto-refresh files every 5 seconds
+  // Auto-refresh files every 2 minutes
   useEffect(() => {
     fetchFiles()
-    const interval = setInterval(fetchFiles, 5000)
+    const interval = setInterval(fetchFiles, 120000) // 2 minutes = 120,000 ms
     return () => clearInterval(interval)
   }, [])
 

@@ -1,7 +1,22 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import './FileTable.css'
 
 const FileTable = ({ files, loading, onAction, onRefresh }) => {
+  const [searchTerm, setSearchTerm] = useState('')
+  
+  // Filter files based on search term
+  const filteredFiles = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return files
+    }
+    
+    const searchLower = searchTerm.toLowerCase()
+    return files.filter(file => 
+      file.file_id.toLowerCase().includes(searchLower) ||
+      file.file_name.toLowerCase().includes(searchLower)
+    )
+  }, [files, searchTerm])
+  
   const formatDateTime = (dateString) => {
     if (!dateString) return 'N/A'
     return new Date(dateString).toLocaleString()
@@ -55,10 +70,30 @@ const FileTable = ({ files, loading, onAction, onRefresh }) => {
   return (
     <div className="file-table-container">
       <div className="table-header">
-        <h2>Files ({files.length})</h2>
-        <button className="btn btn-secondary" onClick={onRefresh}>
-          Refresh
-        </button>
+        <h2>Files ({filteredFiles.length}{searchTerm ? ` of ${files.length}` : ''})</h2>
+        <div className="table-controls">
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search by File ID or Name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            {searchTerm && (
+              <button 
+                className="clear-search-btn"
+                onClick={() => setSearchTerm('')}
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
+          </div>
+          <button className="btn btn-secondary" onClick={onRefresh}>
+            Refresh
+          </button>
+        </div>
       </div>
       
       {files.length === 0 ? (
@@ -83,7 +118,7 @@ const FileTable = ({ files, loading, onAction, onRefresh }) => {
               </tr>
             </thead>
             <tbody>
-              {files.map((file) => (
+              {filteredFiles.map((file) => (
                 <tr key={file.id}>
                   <td className="file-id">{file.file_id}</td>
                   <td className="file-name" title={file.file_name}>{file.file_name}</td>

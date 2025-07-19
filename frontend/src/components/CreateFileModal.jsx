@@ -61,8 +61,6 @@ const CreateFileModal = ({ onSubmit, onClose }) => {
     
     if (!formData.file_id.trim()) {
       newErrors.file_id = 'File ID is required'
-    } else if (!/^[A-Z]-\d{4}$/.test(formData.file_id)) {
-      newErrors.file_id = 'File ID must be in format: F-2024'
     }
     
     if (!formData.file_name.trim()) {
