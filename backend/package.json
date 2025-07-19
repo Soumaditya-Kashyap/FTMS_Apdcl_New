@@ -1,0 +1,13 @@
+{
+   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "testdb": "node dbTest.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "mysql": "^2.18.1"
+  }
+}
