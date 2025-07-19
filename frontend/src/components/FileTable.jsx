@@ -215,8 +215,8 @@ const FileTable = ({ files, loading, onAction, onRefresh }) => {
               </button>
             )}
           </div>
-          <button onClick={onRefresh} className="refresh-btn">
-            🔄 Refresh
+          <button className="btn btn-secondary" onClick={onRefresh}>
+            Refresh
           </button>
         </div>
       </div>
