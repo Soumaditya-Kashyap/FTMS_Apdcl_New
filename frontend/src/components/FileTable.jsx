@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import './FileTable.css'
+import FileHistoryModal from './FileHistoryModal'
 
 const FileTable = ({ files, loading, onAction, onRefresh }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilter, setActiveFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
+  const [historyModal, setHistoryModal] = useState({ isOpen: false, fileId: null, fileName: null })
   const filesPerPage = 10
   
   // Filter and paginate files based on search term, status filter, and pagination
@@ -103,6 +105,14 @@ const FileTable = ({ files, loading, onAction, onRefresh }) => {
         break
     }
     return actions
+  }
+
+  const handleFileIdClick = (fileId, fileName) => {
+    setHistoryModal({ isOpen: true, fileId, fileName })
+  }
+
+  const closeHistoryModal = () => {
+    setHistoryModal({ isOpen: false, fileId: null, fileName: null })
   }
 
   if (loading) {
@@ -245,7 +255,15 @@ const FileTable = ({ files, loading, onAction, onRefresh }) => {
             <tbody>
               {paginatedFiles.map((file) => (
                 <tr key={file.id}>
-                  <td className="file-id">{file.file_id}</td>
+                  <td className="file-id">
+                    <button 
+                      className="file-id-link" 
+                      onClick={() => handleFileIdClick(file.file_id, file.file_name)}
+                      title="Click to view file history"
+                    >
+                      {file.file_id}
+                    </button>
+                  </td>
                   <td className="file-name" title={file.file_name}>{file.file_name}</td>
                   <td title={file.created_by}>{file.created_by}</td>
                   <td title={formatDateTime(file.created_time)}>{formatDateTime(file.created_time)}</td>
@@ -285,6 +303,14 @@ const FileTable = ({ files, loading, onAction, onRefresh }) => {
           </table>
         </div>
       )}
+      
+      {/* File History Modal */}
+      <FileHistoryModal 
+        isOpen={historyModal.isOpen}
+        onClose={closeHistoryModal}
+        fileId={historyModal.fileId}
+        fileName={historyModal.fileName}
+      />
     </div>
   )
 }

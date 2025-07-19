@@ -334,8 +334,32 @@
 
 .file-id {
   font-family: 'Courier New', monospace;
-  font-weight: 600;
+  font-weight: bold;
+  color: #495057;
+}
+
+.file-id-link {
+  background: none;
+  border: none;
   color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: inherit;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.file-id-link:hover {
+  color: #0056b3;
+  text-decoration: none;
+}
+
+.file-id-link:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .file-name {
