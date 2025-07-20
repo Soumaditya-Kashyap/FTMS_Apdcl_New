@@ -1,14 +1,21 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import FileTable from './components/FileTable'
 import CreateFileModal from './components/CreateFileModal'
 import ActionModal from './components/ActionModal'
+import Login from './components/Login'
+import Signup from './components/Signup'
+import UserProfile from './components/UserProfile'
 import './App.css'
 
 function App() {
   const [files, setFiles] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showActionModal, setShowActionModal] = useState(false)
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [actionModal, setActionModal] = useState({ isOpen: false, file: null, action: null })
+  const [user, setUser] = useState(null)
+  const [authMode, setAuthMode] = useState('login') // 'login' or 'signup'
+  const [profileModalOpen, setProfileModalOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
   const [actionType, setActionType] = useState('')
   const [error, setError] = useState('')
@@ -34,12 +41,73 @@ function App() {
     }
   }
 
+  // Fetch users from backend
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
+      }
+      const data = await response.json()
+      setUsers(data)
+    } catch (err) {
+      console.error('Error fetching users:', err)
+    }
+  }
+
   // Auto-refresh files every 2 minutes
   useEffect(() => {
-    fetchFiles()
-    const interval = setInterval(fetchFiles, 120000) // 2 minutes = 120,000 ms
-    return () => clearInterval(interval)
+    // Check if user is already logged in with session validation
+    const checkUserSession = () => {
+      const userSession = localStorage.getItem('userSession')
+      const savedUser = localStorage.getItem('user')
+      
+      if (userSession) {
+        try {
+          const sessionData = JSON.parse(userSession)
+          const now = new Date()
+          const expiresAt = new Date(sessionData.expiresAt)
+          
+          if (now < expiresAt) {
+            // Session is still valid
+            setUser(sessionData.user)
+            return
+          } else {
+            // Session expired, clear storage
+            localStorage.removeItem('userSession')
+            localStorage.removeItem('user')
+          }
+        } catch (err) {
+          console.error('Error parsing user session:', err)
+          localStorage.removeItem('userSession')
+        }
+      } else if (savedUser) {
+        // Fallback to old user storage (for backward compatibility)
+        try {
+          setUser(JSON.parse(savedUser))
+        } catch (err) {
+          console.error('Error parsing saved user:', err)
+          localStorage.removeItem('user')
+        }
+      }
+    }
+    
+    checkUserSession()
   }, [])
+
+  useEffect(() => {
+    if (user) {
+      fetchFiles()
+      fetchUsers()
+      
+      // Set up auto-refresh every 2 minutes
+      const interval = setInterval(() => {
+        fetchFiles()
+      }, 120000) // 2 minutes
+      
+      return () => clearInterval(interval)
+    }
+  }, [user])
 
   const handleCreateFile = async (fileData) => {
     try {
@@ -57,7 +125,7 @@ function App() {
       }
       
       await fetchFiles() // Refresh the list
-      setShowCreateModal(false)
+      setCreateModalOpen(false)
       setError('')
     } catch (err) {
       console.error('Error creating file:', err)
@@ -98,7 +166,7 @@ function App() {
       }
       
       await fetchFiles() // Refresh the list
-      setShowActionModal(false)
+      setActionModal({ isOpen: false, file: null, action: null })
       setSelectedFile(null)
       setActionType('')
       setError('')
@@ -111,19 +179,66 @@ function App() {
   const openActionModal = (file, action) => {
     setSelectedFile(file)
     setActionType(action)
-    setShowActionModal(true)
+    setActionModal({ isOpen: true, file, action })
+  }
+
+  const closeActionModal = () => {
+    setActionModal({ isOpen: false, file: null, action: null })
+  }
+
+  const handleLogin = (userData) => {
+    setUser(userData)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('user')
+    localStorage.removeItem('userSession')
+    setUser(null)
+    setProfileModalOpen(false)
+    setFiles([])
+    setUsers([])
+  }
+
+  const switchAuthMode = () => {
+    setAuthMode(authMode === 'login' ? 'signup' : 'login')
+  }
+
+  // Show authentication if user is not logged in
+  if (!user) {
+    return (
+      <div className="App">
+        {authMode === 'login' ? (
+          <Login onLogin={handleLogin} onSwitchToSignup={switchAuthMode} />
+        ) : (
+          <Signup onSwitchToLogin={switchAuthMode} />
+        )}
+      </div>
+    )
   }
 
   return (
-    <div className="app">
+    <div className="App">
       <header className="app-header">
-        <h1>File Tracking & Management System</h1>
-        <button 
-          className="btn btn-primary"
-          onClick={() => setShowCreateModal(true)}
-        >
-          Create New File
-        </button>
+        <h1>APDCL File Tracking & Management System</h1>
+        <div className="header-actions">
+          <button 
+            className="btn btn-primary"
+            onClick={() => setCreateModalOpen(true)}
+          >
+            Create File
+          </button>
+          <button 
+            className="user-profile-btn"
+            onClick={() => setProfileModalOpen(true)}
+            title="Click to view profile"
+          >
+            <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
+            <div className="user-profile-text">
+              <span className="user-profile-name">{user.name}</span>
+              <span className="user-profile-role">APDCL User</span>
+            </div>
+          </button>
+        </div>
       </header>
 
       {error && (
@@ -141,25 +256,28 @@ function App() {
         />
       </main>
 
-      {showCreateModal && (
+      {createModalOpen && (
         <CreateFileModal
           onSubmit={handleCreateFile}
-          onClose={() => setShowCreateModal(false)}
+          onClose={() => setCreateModalOpen(false)}
         />
       )}
 
-      {showActionModal && (
+      {actionModal.isOpen && (
         <ActionModal
-          file={selectedFile}
-          actionType={actionType}
+          file={actionModal.file}
+          actionType={actionModal.action}
           onSubmit={handleFileAction}
-          onClose={() => {
-            setShowActionModal(false)
-            setSelectedFile(null)
-            setActionType('')
-          }}
+          onClose={closeActionModal}
         />
       )}
+
+      <UserProfile 
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        user={user}
+        onLogout={handleLogout}
+      />
     </div>
   )
 }

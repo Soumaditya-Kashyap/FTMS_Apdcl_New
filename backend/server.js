@@ -266,6 +266,147 @@ app.put('/api/files/:fileId/close', async (req, res) => {
   }
 });
 
+// Authentication endpoints
+
+// User signup
+app.post('/api/auth/signup', (req, res) => {
+  const { apdcl_id, name, email, phone, password, department } = req.body;
+  
+  // Validate required fields
+  if (!apdcl_id || !name || !email || !password) {
+    return res.status(400).json({ error: 'APDCL ID, name, email, and password are required' });
+  }
+  
+  // Validate APDCL ID format (8 characters)
+  if (apdcl_id.length !== 8) {
+    return res.status(400).json({ error: 'APDCL ID must be exactly 8 characters' });
+  }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Please enter a valid email address' });
+  }
+  
+  // Validate password length
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  }
+  
+  // Check if user already exists
+  const checkQuery = 'SELECT apdcl_id, email FROM users WHERE apdcl_id = ? OR email = ?';
+  db.query(checkQuery, [apdcl_id, email], (err, results) => {
+    if (err) {
+      console.error('Error checking existing user:', err);
+      return res.status(500).json({ error: 'Database error while checking user' });
+    }
+    
+    if (results.length > 0) {
+      const existingUser = results[0];
+      if (existingUser.apdcl_id === apdcl_id) {
+        return res.status(409).json({ error: 'User with this APDCL ID already exists' });
+      }
+      if (existingUser.email === email) {
+        return res.status(409).json({ error: 'User with this email already exists' });
+      }
+    }
+    
+    // Insert new user
+    const insertQuery = `
+      INSERT INTO users (apdcl_id, name, email, phone, password, department)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    
+    db.query(insertQuery, [apdcl_id, name, email, phone || null, password, department || null], (err, result) => {
+      if (err) {
+        console.error('Error creating user:', err);
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ error: 'User with this APDCL ID or email already exists' });
+        }
+        return res.status(500).json({ error: 'Failed to create user account' });
+      }
+      
+      console.log(`New user created: ${apdcl_id} - ${name}`);
+      res.status(201).json({ 
+        message: 'Account created successfully! Please sign in.',
+        userId: result.insertId
+      });
+    });
+  });
+});
+
+// User login
+app.post('/api/auth/login', (req, res) => {
+  const { apdcl_id, password } = req.body;
+  
+  if (!apdcl_id || !password) {
+    return res.status(400).json({ error: 'APDCL ID and password are required' });
+  }
+  
+  // Validate APDCL ID format
+  if (apdcl_id.length !== 8) {
+    return res.status(400).json({ error: 'APDCL ID must be exactly 8 characters' });
+  }
+  
+  const query = `
+    SELECT id, apdcl_id, name, email, phone, department
+    FROM users 
+    WHERE apdcl_id = ? AND password = ?
+  `;
+  
+  db.query(query, [apdcl_id, password], (err, results) => {
+    if (err) {
+      console.error('Error during login:', err);
+      return res.status(500).json({ error: 'Database error during login' });
+    }
+    
+    if (results.length === 0) {
+      console.log(`Failed login attempt for APDCL ID: ${apdcl_id}`);
+      return res.status(401).json({ error: 'Invalid APDCL ID or password' });
+    }
+    
+    const user = results[0];
+    console.log(`Successful login: ${user.apdcl_id} - ${user.name}`);
+    
+    res.json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        apdcl_id: user.apdcl_id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        department: user.department
+      },
+      loginTime: new Date().toISOString()
+    });
+  });
+});
+
+// Get user profile
+app.get('/api/auth/profile/:userId', (req, res) => {
+  const { userId } = req.params;
+  
+  const query = `
+    SELECT id, apdcl_id, name, email, phone, department, created_at
+    FROM users 
+    WHERE id = ?
+  `;
+  
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching user profile:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json(results[0]);
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
