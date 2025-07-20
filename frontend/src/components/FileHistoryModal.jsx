@@ -67,7 +67,7 @@ const FileHistoryModal = ({ isOpen, onClose, fileId, fileName }) => {
   if (!isOpen) return null
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="file-history-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>File History</h2>

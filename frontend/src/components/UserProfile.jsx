@@ -42,7 +42,7 @@ const UserProfile = ({ isOpen, onClose, user, onLogout }) => {
   if (!isOpen || !user) return null
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="user-profile-modal" onClick={(e) => e.stopPropagation()}>
         <div className="profile-header">
           <div className="header-content">
