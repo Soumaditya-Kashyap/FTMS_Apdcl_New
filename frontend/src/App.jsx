@@ -129,7 +129,8 @@ function App() {
       setError('')
     } catch (err) {
       console.error('Error creating file:', err)
-      setError(err.message)
+      // Re-throw the error so the modal can handle it
+      throw err
     }
   }
 

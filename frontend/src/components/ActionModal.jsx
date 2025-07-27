@@ -5,7 +5,8 @@ const ActionModal = ({ file, actionType, onSubmit, onClose }) => {
   const [formData, setFormData] = useState({
     updated_by_id: '',
     moved_to: '',
-    received_at: ''
+    received_at: '',
+    movement_time: ''
   })
   const [users, setUsers] = useState([])
   const [errors, setErrors] = useState({})
@@ -53,6 +54,10 @@ const ActionModal = ({ file, actionType, onSubmit, onClose }) => {
       newErrors.moved_to = 'Destination is required'
     }
     
+    if (actionType === 'move' && !formData.movement_time.trim()) {
+      newErrors.movement_time = 'Movement time is required'
+    }
+    
     if (actionType === 'receive' && !formData.received_at.trim()) {
       newErrors.received_at = 'Received location is required'
     }
@@ -74,6 +79,7 @@ const ActionModal = ({ file, actionType, onSubmit, onClose }) => {
       
       if (actionType === 'move') {
         submitData.moved_to = formData.moved_to
+        submitData.movement_time = formData.movement_time
       } else if (actionType === 'receive') {
         submitData.received_at = formData.received_at
       }
@@ -149,19 +155,34 @@ const ActionModal = ({ file, actionType, onSubmit, onClose }) => {
           </div>
           
           {actionType === 'move' && (
-            <div className="form-group">
-              <label htmlFor="moved_to">Move To *</label>
-              <input
-                type="text"
-                id="moved_to"
-                name="moved_to"
-                value={formData.moved_to}
-                onChange={handleChange}
-                placeholder="Enter destination location"
-                className={errors.moved_to ? 'error' : ''}
-              />
-              {errors.moved_to && <span className="error-text">{errors.moved_to}</span>}
-            </div>
+            <>
+              <div className="form-group">
+                <label htmlFor="moved_to">Move To *</label>
+                <input
+                  type="text"
+                  id="moved_to"
+                  name="moved_to"
+                  value={formData.moved_to}
+                  onChange={handleChange}
+                  placeholder="Enter destination location"
+                  className={errors.moved_to ? 'error' : ''}
+                />
+                {errors.moved_to && <span className="error-text">{errors.moved_to}</span>}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="movement_time">Movement Time *</label>
+                <input
+                  type="datetime-local"
+                  id="movement_time"
+                  name="movement_time"
+                  value={formData.movement_time}
+                  onChange={handleChange}
+                  className={errors.movement_time ? 'error' : ''}
+                />
+                {errors.movement_time && <span className="error-text">{errors.movement_time}</span>}
+              </div>
+            </>
           )}
           
           {actionType === 'receive' && (

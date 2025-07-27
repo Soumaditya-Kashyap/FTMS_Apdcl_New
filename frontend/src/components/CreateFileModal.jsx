@@ -95,6 +95,27 @@ const CreateFileModal = ({ onSubmit, onClose }) => {
       await onSubmit(formData)
     } catch (error) {
       console.error('Error submitting form:', error)
+      
+      // Clear any previous errors first
+      setErrors(prev => ({ ...prev, file_id: '' }))
+      
+      // Check different error formats and look for duplicate/existing file ID errors
+      const errorMessage = error.message || ''
+      
+      if (errorMessage.toLowerCase().includes('file id already exists') || 
+          errorMessage.toLowerCase().includes('duplicate entry') ||
+          errorMessage.toLowerCase().includes('file_id') && errorMessage.toLowerCase().includes('duplicate')) {
+        setErrors(prev => ({
+          ...prev,
+          file_id: 'File ID already exists'
+        }))
+      } else {
+        // For other errors, show a general error under file_id field
+        setErrors(prev => ({
+          ...prev,
+          file_id: errorMessage || 'An error occurred while creating the file'
+        }))
+      }
     } finally {
       setIsSubmitting(false)
     }
